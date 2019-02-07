@@ -42,6 +42,20 @@ cyreni$range <- background.raster.buffer(cyreni$presence.points, 100000, euro.wo
 monticola$range <- background.raster.buffer(monticola$presence.points, 100000, euro.worldclim)
 identity.test(cyreni, monticola, env = euro.worldclim, type = "glm",
 f = pres ~ bio1 + bio12, nreps = 10)
+
+Or for parallel
+
+library(doParallel)
+cl <- makeCluster(2) # will use two cores, you can change this
+registerDoParallel(cl)
+data(iberolacerta.clade)
+data(euro.worldclim)
+cyreni <- iberolacerta.clade$species$cyreni
+monticola <- iberolacerta.clade$species$monticola
+cyreni$range <- background.raster.buffer(cyreni$presence.points, 100000, euro.worldclim)
+monticola$range <- background.raster.buffer(monticola$presence.points, 100000, euro.worldclim)
+identity.test(cyreni, monticola, env = euro.worldclim, type = "glm",
+f = pres ~ bio1 + bio12, nreps = 10)
 }
 }
 \keyword{enmtools,}
