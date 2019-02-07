@@ -37,7 +37,9 @@ Imports:
 	magrittr,
 	ranger,
 	ENMeval,
-	vegan
+	vegan,
+	foreach,
+	doParallel
 Depends:
 	raster,
 	dismo

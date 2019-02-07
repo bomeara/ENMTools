@@ -94,7 +94,8 @@ background.test <- function(species.1, species.2, env, type, f = NULL, nreps = 9
   reps.overlap <- empirical.overlap
 
   cat("\nBuilding replicate models...\n")
-  for(i in 1:nreps){
+  reps.overlap = foreach(ind=1:nrep, .combine=rbind) %dopar% {
+#  for(i in 1:nreps){
     cat(paste("\nReplicate", i, "...\n"))
 
     rep.species.1 <- species.1
@@ -156,6 +157,7 @@ background.test <- function(species.1, species.2, env, type, f = NULL, nreps = 9
     # Appending overlap to results
     reps.overlap <- rbind(reps.overlap, c(unlist(raster.overlap(rep.species.1.model, rep.species.2.model)),
                                           unlist(env.overlap(rep.species.1.model, rep.species.2.model, env = env)[1:3])))
+    reps.overlap
 
   }
 
