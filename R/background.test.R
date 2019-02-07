@@ -30,6 +30,20 @@
 #' monticola$range <- background.raster.buffer(monticola$presence.points, 100000, euro.worldclim)
 #' background.test(cyreni, monticola, env = euro.worldclim, type = "glm",
 #' f = pres ~ bio1 + bio12, nreps = 10)
+#'
+#'
+#' #or if you want to run in parallel
+#' library(doParallel)
+#' cl <- makeCluster(2) # will use two cores
+#' registerDoParallel(cl)
+#' data(iberolacerta.clade)
+#' data(euro.worldclim)
+#' cyreni <- iberolacerta.clade$species$cyreni
+#' monticola <- iberolacerta.clade$species$monticola
+#' cyreni$range <- background.raster.buffer(cyreni$presence.points, 100000, euro.worldclim)
+#' monticola$range <- background.raster.buffer(monticola$presence.points, 100000, euro.worldclim)
+#' background.test(cyreni, monticola, env = euro.worldclim, type = "glm",
+#' f = pres ~ bio1 + bio12, nreps = 10)
 #' }
 
 background.test <- function(species.1, species.2, env, type, f = NULL, nreps = 99, test.type = "asymmetric", nback = 1000, bg.source = "default", ...){
@@ -94,7 +108,7 @@ background.test <- function(species.1, species.2, env, type, f = NULL, nreps = 9
   reps.overlap <- empirical.overlap
 
   cat("\nBuilding replicate models...\n")
-  reps.overlap = foreach(ind=1:nrep, .combine=rbind) %dopar% {
+  multiples.overlap = foreach(i=1:nreps, .combine=rbind) %dopar% {
 #  for(i in 1:nreps){
     cat(paste("\nReplicate", i, "...\n"))
 
@@ -155,12 +169,22 @@ background.test <- function(species.1, species.2, env, type, f = NULL, nreps = 9
     replicate.models[[paste0(species.2$species.name, ".rep.", i)]] <- rep.species.2.model
 
     # Appending overlap to results
-    reps.overlap <- rbind(reps.overlap, c(unlist(raster.overlap(rep.species.1.model, rep.species.2.model)),
-                                          unlist(env.overlap(rep.species.1.model, rep.species.2.model, env = env)[1:3])))
-    reps.overlap
+  #  reps.overlap <- rbind(reps.overlap, c(unlist(raster.overlap(rep.species.1.model, rep.species.2.model)),
+  #                                        unlist(env.overlap(rep.species.1.model, rep.species.2.model, env = env)[1:3])))
+
+# new return object
+#return_vector, nrow=1))
+#colnames(a) <- colnames(return_vector)
+#save(a, file="~/Desktop/debug.rda")
+
+    #data.frame(c(unlist(raster.overlap(rep.species.1.model, rep.species.2.model)),
+                                          #unlist(env.overlap(rep.species.1.model, rep.species.2.model, env = env)[1:3])))
+data.frame(matrix(c(unlist(raster.overlap(rep.species.1.model, rep.species.2.model)),
+      unlist(env.overlap(rep.species.1.model, rep.species.2.model, env = env)[1:3])), nrow=1))
 
   }
-
+  reps.overlap <- rbind(reps.overlap, multiples.overlap)
+  colnames(reps.overlap) <- names(empirical.overlap)
   rownames(reps.overlap) <- c("empirical", paste("rep", 1:nreps))
   print(reps.overlap)
   p.values <- apply(reps.overlap, 2, function(x) 2 * (1 - max(mean(x > x[1]), mean(x < x[1]))))
