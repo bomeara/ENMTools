@@ -110,7 +110,11 @@ background.test <- function(species.1, species.2, env, type, f = NULL, nreps = 9
   cat("\nBuilding replicate models...\n")
   multiples.overlap = foreach(i=1:nreps, .combine=rbind) %dopar% {
 #  for(i in 1:nreps){
-    cat(paste("\nReplicate", i, "...\n"))
+    Sys.sleep(2 * (i%%10)) # trying to avoid file lock issues:
+    #Feb 07, 2019 6:53:08 PM java.util.prefs.FileSystemPreferences syncWorld
+    #WARNING: Couldn't flush user prefs: java.util.prefs.BackingStoreException: Couldn't get file lock.
+
+#    cat(paste("\nReplicate", i, "...\n"))
 
     rep.species.1 <- species.1
     rep.species.2 <- species.2
